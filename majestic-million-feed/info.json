@@ -1,0 +1,89 @@
+{
+  "name": "majestic-million-feed",
+  "label": "Majestic Million Feed",
+  "version": "1.0.0",
+  "description": "Majestic crawls the web and analyzes the data to create a huge Link Intelligence dataset describing how the world wide web links together. Use the Majestic Million connector to ingest the top known websites as 'good' indicators.",
+  "publisher": "Fortinet",
+  "cs_approved": true,
+  "cs_compatible": true,
+  "category": "Threat Intelligence",
+  "icon_small_name": "small.png",
+  "icon_large_name": "large.png",
+  "help_online": "",
+  "configuration": {
+    "fields": [
+      {
+        "title": "Verify SSL",
+        "name": "verify_ssl",
+        "type": "checkbox",
+        "required": false,
+        "editable": true,
+        "visible": true,
+        "value": true,
+        "description": "Specifies whether the SSL certificate for the server is to be verified or not.By default, this option is set as True."
+      }
+    ]
+  },
+  "operations": [
+    {
+      "operation": "download_domains_csv",
+      "title": "Download Domains CSV",
+      "description": "Downloads Top 100k good domains and their ratings in a CSV format.",
+      "category": "investigation",
+      "annotation": "download_domains_csv",
+      "enabled": true,
+      "output_schema": {
+        "Path": "",
+        "Status": ""
+      },
+      "parameters": []
+    },
+    {
+      "operation": "get_domain_records",
+      "title": "Get Domain Records",
+      "description": "Retrieves Top 100k good domains and their ratings.",
+      "category": "investigation",
+      "annotation": "get_domain_records",
+      "enabled": true,
+      "output_schema": [
+        {
+          "TLD": "",
+          "Domain": "",
+          "RefIPs": "",
+          "IDN_TLD": "",
+          "TldRank": "",
+          "GlobalRank": "",
+          "IDN_Domain": "",
+          "PrevRefIPs": "",
+          "RefSubNets": "",
+          "PrevTldRank": "",
+          "PrevGlobalRank": "",
+          "PrevRefSubNets": ""
+        }
+      ],
+      "parameters": [
+        {
+          "title": "Limit",
+          "required": true,
+          "editable": true,
+          "visible": true,
+          "value": 50,
+          "type": "integer",
+          "name": "limit",
+          "description": "Specify the maximum number of good indicators domain to retrieve.",
+          "tooltip": "Specify the maximum number of good indicators domain to retrieve."
+        }
+      ]
+    }
+  ],
+  "ingestion_supported": true,
+  "ingestion_modes": [
+    "scheduled"
+  ],
+  "ingestion_preferences": {
+    "modules": [
+      "threat_intel_feeds",
+      "indicators"
+    ]
+  }
+}
