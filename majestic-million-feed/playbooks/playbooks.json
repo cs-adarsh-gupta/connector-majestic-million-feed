@@ -25,7 +25,7 @@
           "aliasName": null,
           "tag": null,
           "description": "Fetch Indicators from Majestic Million Feed",
-          "isActive": true,
+          "isActive": false,
           "debug": false,
           "singleRecordExecution": false,
           "remoteExecutableFlag": false,
@@ -422,7 +422,7 @@
               "description": null,
               "arguments": {
                 "name": "Majestic Million Feed",
-                "config": "''",
+                "config": "",
                 "params": [],
                 "version": "1.0.0",
                 "connector": "majestic-million-feed",
@@ -499,8 +499,8 @@
           "aliasName": null,
           "tag": null,
           "description": "Create Indicators from Majestic Million Feed",
-          "isActive": true,
-          "debug": true,
+          "isActive": false,
+          "debug": false,
           "singleRecordExecution": false,
           "remoteExecutableFlag": false,
           "parameters": [

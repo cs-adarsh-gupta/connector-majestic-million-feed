@@ -2,7 +2,7 @@
   "name": "majestic-million-feed",
   "label": "Majestic Million Feed",
   "version": "1.0.0",
-  "description": "Majestic crawls the web and analyzes the data to create a huge Link Intelligence dataset describing how the world wide web links together. Use the Majestic Million connector to ingest the top known websites as 'good' indicators.",
+  "description": "Majestic crawls the web and analyzes the data to create a huge Link Intelligence dataset describing how the world wide web links together. Use the Majestic Million connector to ingest the top known websites as 'good' indicators. This connector has a dependency on the Threat Intel Management Solution Pack. Install the Solution Pack before enabling ingestion of Threat Feeds from this source.",
   "publisher": "Fortinet",
   "cs_approved": true,
   "cs_compatible": true,
@@ -20,6 +20,7 @@
         "editable": true,
         "visible": true,
         "value": true,
+        "tooltip": "Specifies whether the SSL certificate for the server is to be verified or not.By default, this option is set as True.",
         "description": "Specifies whether the SSL certificate for the server is to be verified or not.By default, this option is set as True."
       }
     ]
