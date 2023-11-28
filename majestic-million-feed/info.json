@@ -2,7 +2,7 @@
   "name": "majestic-million-feed",
   "label": "Majestic Million Feed",
   "version": "1.0.0",
-  "description": "Majestic crawls the web and analyzes the data to create a huge Link Intelligence dataset describing how the world wide web links together. Use the Majestic Million connector to ingest the top known websites as 'good' indicators. This connector has a dependency on the Threat Intel Management Solution Pack. Install the Solution Pack before enabling ingestion of Threat Feeds from this source.",
+  "description": "Majestic crawls the web and analyzes the data to create a huge Link Intelligence dataset describing how the world wide web links together. Use the Majestic Million connector to ingest the top known websites as 'good' indicators. <br/><br/>This connector has a dependency on the <a href=\\\"/content-hub/all-content/?contentType=solutionpack&amp;tag=ThreatIntelManagement\\\" target=\\\"_blank\\\" rel=\\\"noopener\\\">Threat Intel Management Solution Pack</a>. Install the Solution Pack before enabling ingestion of Threat Feeds from this source.",
   "publisher": "Fortinet",
   "cs_approved": true,
   "cs_compatible": true,
