@@ -188,7 +188,7 @@
         {
           "@type": "Workflow",
           "triggerLimit": null,
-          "name": "Majestic Million Feed > Fetch > Ingest",
+          "name": "Majestic Million Feed > Ingest > Fetch",
           "aliasName": null,
           "tag": null,
           "description": "Create Indicators from Majestic Million Feed",
