@@ -6,9 +6,9 @@ Copyright end
 """
 
 import requests, json
+import datetime
 from connectors.core.connector import get_logger, ConnectorError
 from django.conf import settings
-import os
 import polars as pl
 from integrations.crudhub import make_request
 from requests import request, post, exceptions as req_exceptions
@@ -132,7 +132,7 @@ def get_domain_records(config, params, **kwargs):
         else:
             # Download and Create CSV Attachment in FortiSOAR
             res = response.content
-            file_name = "majestic_million_feed.csv"
+            file_name = "majestic_million_feed_" + datetime.datetime.now().strftime("%d%m%Y_%H%M%S") + ".csv"
             return _create_cyops_attachment(file_name=file_name, content=res)
     except Exception as err:
         logger.error(str(err))
