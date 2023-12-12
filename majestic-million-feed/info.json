@@ -136,8 +136,8 @@
             "Create as Feed Records in FortiSOAR"
           ],
           "value": "Return as JSON",
-          "tooltip": "Select the method of returning the Feed Data information. You can choose between the data being created as \"Feed records\" in FortiSOAR (the Create as Feed Records in FortiSOAR option) or data being returned in the JSON format (the Return as a JSON option).",
-          "description": "Select the method of returning the Feed Data information. You can choose from the following options:  \nCreate as Feed Records in FortiSOAR: Specify data in following fields:  \nRecord Creation Playbook IRI: Specify the IRI of the playbook that creates feed records in FortiSOAR. \nConfidence: Specify the confidence score to be set for the feeds. The default value is 90. \nReputation: Select the reputation to be set for the feeds. You can choose from the following options:  Good, Suspicious, Malicious, No Reputation Available, TBD.  \nTLP: Select the TLP to be set for the feeds. You can choose from the following options: Red, Amber, Green, White. \nMaximum Age (in days): Specify the age for the feeds. The indicator expires on valid_until date unless a different expiry is specified here. When specified, the indicator is marked expired on valid_from + expiry. Return as a JSON.",
+          "tooltip": "Select the method of returning the Feed Data information.",
+          "description": "Select the method of returning the feed data information. You can choose from the following options: Create as Feed Records in FortiSOAR, Return as a JSON & Download and Create CSV Attachment in FortiSOAR",
           "onchange": {
             "Create as Feed Records in FortiSOAR": [
               {
