@@ -2,7 +2,7 @@
   "name": "majestic-million-feed",
   "label": "Majestic Million Feed",
   "version": "1.0.0",
-  "description": "Majestic crawls the web and analyzes the data to create a huge Link Intelligence dataset describing how the world wide web links together. Use the Majestic Million connector to ingest the top known websites as 'good' indicators. <br/><br/>This connector has a dependency on the <a href=\\\"/content-hub/all-content/?contentType=solutionpack&amp;tag=ThreatIntelManagement\\\" target=\\\"_blank\\\" rel=\\\"noopener\\\">Threat Intel Management Solution Pack</a>. Install the Solution Pack before enabling ingestion of Threat Feeds from this source.",
+  "description": "Majestic crawls the web and analyzes the data to create a huge Link Intelligence dataset describing how the world wide web links together. Use the Majestic Million connector to ingest the top known websites as 'good' indicators. This connector facilitates automated operations related to fetching the list indicators and ingestion of daily threat feeds.<br></br> This connector has a dependency on the <a href=\"/content-hub/all-content/?contentType=solutionpack&amp;tag=ThreatIntelManagement\" target=\"_blank\" rel=\"noopener\">Threat Intel Management Solution Pack</a>. Install the Solution Pack before enabling ingestion of Threat Feeds from this source.",
   "publisher": "Fortinet",
   "cs_approved": true,
   "cs_compatible": true,
@@ -20,59 +20,211 @@
         "editable": true,
         "visible": true,
         "value": true,
-        "tooltip": "Specifies whether the SSL certificate for the server is to be verified or not.By default, this option is set as True.",
-        "description": "Specifies whether the SSL certificate for the server is to be verified or not.By default, this option is set as True."
+        "tooltip": "Specifies whether the SSL certificate for the server is to be verified or not. By default, this option is set as True.",
+        "description": "Specifies whether the SSL certificate for the server is to be verified or not. By default, this option is set as True."
       }
     ]
   },
   "operations": [
     {
-      "operation": "download_domains_csv",
-      "title": "Download Domains CSV",
-      "description": "Downloads Top 100k good domains and their ratings in a CSV format.",
-      "category": "investigation",
-      "annotation": "download_domains_csv",
-      "enabled": true,
-      "output_schema": {
-        "Path": "",
-        "Status": ""
-      },
-      "parameters": []
-    },
-    {
       "operation": "get_domain_records",
       "title": "Get Domain Records",
-      "description": "Retrieves Top 100k good domains and their ratings.",
+      "description": "Retrieve or download top one million good domains from Majestic Million.",
       "category": "investigation",
       "annotation": "get_domain_records",
       "enabled": true,
-      "output_schema": [
+      "conditional_output_schema": [
         {
-          "TLD": "",
-          "Domain": "",
-          "RefIPs": "",
-          "IDN_TLD": "",
-          "TldRank": "",
-          "GlobalRank": "",
-          "IDN_Domain": "",
-          "PrevRefIPs": "",
-          "RefSubNets": "",
-          "PrevTldRank": "",
-          "PrevGlobalRank": "",
-          "PrevRefSubNets": ""
+          "condition": "{{process_response_as == 'Download and Create CSV Attachment in FortiSOAR'}}",
+          "output_schema": {
+            "id": "",
+            "@id": "",
+            "file": {
+              "id": "",
+              "@id": "",
+              "size": "",
+              "uuid": "",
+              "@type": "",
+              "assignee": "",
+              "filename": "",
+              "metadata": [],
+              "mimeType": "",
+              "thumbnail": "",
+              "uploadDate": ""
+            },
+            "name": "",
+            "type": "",
+            "uuid": "",
+            "@type": "",
+            "tasks": [],
+            "alerts": [],
+            "assets": [],
+            "owners": [
+              ""
+            ],
+            "people": [],
+            "@context": "",
+            "assignee": "",
+            "comments": [],
+            "warrooms": [],
+            "incidents": [],
+            "createDate": "",
+            "createUser": {
+              "id": "",
+              "@id": "",
+              "name": "",
+              "uuid": "",
+              "@type": "",
+              "avatar": "",
+              "userId": "",
+              "userType": "",
+              "createDate": "",
+              "createUser": "",
+              "modifyDate": "",
+              "modifyUser": ""
+            },
+            "indicators": [],
+            "modifyDate": "",
+            "modifyUser": {
+              "id": "",
+              "@id": "",
+              "name": "",
+              "uuid": "",
+              "@type": "",
+              "avatar": "",
+              "userId": "",
+              "userType": "",
+              "createDate": "",
+              "createUser": "",
+              "modifyDate": "",
+              "modifyUser": ""
+            },
+            "recordTags": [],
+            "userOwners": [],
+            "description": ""
+          }
+        },
+        {
+          "condition": "{{process_response_as == 'Return as JSON'}}",
+          "output_schema": {
+            "TLD": "",
+            "Domain": "",
+            "RefIPs": "",
+            "IDN_TLD": "",
+            "TldRank": "",
+            "GlobalRank": "",
+            "IDN_Domain": "",
+            "PrevRefIPs": "",
+            "RefSubNets": "",
+            "PrevTldRank": "",
+            "PrevGlobalRank": "",
+            "PrevRefSubNets": ""
+          }
         }
       ],
       "parameters": [
         {
-          "title": "Limit",
+          "title": "Process Response As",
+          "name": "process_response_as",
+          "visible": true,
           "required": true,
           "editable": true,
-          "visible": true,
-          "value": 50,
-          "type": "integer",
-          "name": "limit",
-          "description": "Specify the maximum number of good indicators domain to retrieve.",
-          "tooltip": "Specify the maximum number of good indicators domain to retrieve."
+          "type": "select",
+          "options": [
+            "Return as JSON",
+            "Download and Create CSV Attachment in FortiSOAR",
+            "Create as Feed Records in FortiSOAR"
+          ],
+          "value": "Return as JSON",
+          "tooltip": "Select the method of returning the Feed Data information. You can choose between the data being created as \"Feed records\" in FortiSOAR (the Create as Feed Records in FortiSOAR option) or data being returned in the JSON format (the Return as a JSON option).",
+          "description": "Select the method of returning the Feed Data information. You can choose from the following options:  \nCreate as Feed Records in FortiSOAR: Specify data in following fields:  \nRecord Creation Playbook IRI: Specify the IRI of the playbook that creates feed records in FortiSOAR. \nConfidence: Specify the confidence score to be set for the feeds. The default value is 90. \nReputation: Select the reputation to be set for the feeds. You can choose from the following options:  Good, Suspicious, Malicious, No Reputation Available, TBD.  \nTLP: Select the TLP to be set for the feeds. You can choose from the following options: Red, Amber, Green, White. \nMaximum Age (in days): Specify the age for the feeds. The indicator expires on valid_until date unless a different expiry is specified here. When specified, the indicator is marked expired on valid_from + expiry. Return as a JSON.",
+          "onchange": {
+            "Create as Feed Records in FortiSOAR": [
+              {
+                "title": "Record Creation Playbook IRI",
+                "description": "Specify the IRI of the playbook that creates feed records in FortiSOAR.",
+                "tooltip": "e.g. e2de6ed7-b24a-4ab3-bec1-3c9bc19de7c8",
+                "placeholder": "38b90490-e331-41c5-b875-4e5eb2e1d0a2",
+                "type": "text",
+                "name": "create_pb_id",
+                "required": false,
+                "editable": true,
+                "visible": true
+              },
+              {
+                "title": "Limit",
+                "required": false,
+                "editable": true,
+                "visible": true,
+                "type": "integer",
+                "name": "limit",
+                "description": "Specify the maximum number of good indicators domain to retrieve. Max limit is 1000000.",
+                "tooltip": "Specify the maximum number of good indicators domain to retrieve. Max limit is 1000000."
+              },
+              {
+                "title": "Confidence",
+                "name": "confidence",
+                "type": "integer",
+                "tooltip": "Default Confidence score to be set for the feeds.",
+                "description": "Specify the confidence score to be set for the feeds.",
+                "required": false,
+                "editable": true,
+                "visible": true,
+                "value": 90,
+                "validation": {
+                  "minlength": 0,
+                  "maxlength": 100
+                }
+              },
+              {
+                "title": "Reputation",
+                "name": "reputation",
+                "type": "select",
+                "tooltip": "Default Reputation to be set for the feeds.",
+                "description": "Select the reputation to be set for the feeds. You can choose from the following options:  \nGood, Suspicious, Malicious, No Reputation Available, TBD.",
+                "required": false,
+                "editable": true,
+                "visible": true,
+                "options": [
+                  "Good",
+                  "Suspicious",
+                  "Malicious",
+                  "No Reputation Available",
+                  "TBD"
+                ],
+                "value": "Good"
+              },
+              {
+                "title": "TLP",
+                "name": "tlp",
+                "type": "select",
+                "tooltip": "Default TLP to be set for the feeds.",
+                "description": "Select the TLP to be set for the feeds. You can choose from the following options:  \nRed , Amber , Green , White .",
+                "required": false,
+                "editable": true,
+                "visible": true,
+                "options": [
+                  "Red",
+                  "Amber",
+                  "Green",
+                  "White"
+                ],
+                "value": "White"
+              }
+            ],
+            "Return as JSON": [
+              {
+                "title": "Limit",
+                "required": false,
+                "editable": true,
+                "visible": true,
+                "type": "integer",
+                "name": "limit",
+                "description": "Specify the maximum number of good indicators domain to retrieve.",
+                "tooltip": "Specify the maximum number of good indicators domain to retrieve."
+              }
+            ]
+          }
         }
       ]
     }

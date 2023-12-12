@@ -7,10 +7,10 @@
       "name": "Sample - Majestic Million Feed - 1.0.0",
       "description": "Sample playbooks for \"Majestic Million Feed\" connector. If you are planning to use any of the sample playbooks in your environment, ensure that you clone those playbooks and move them to a different collection, since the sample playbook collection gets deleted during connector upgrade and delete.",
       "visible": true,
-      "image": "/api/3/images/1596037a-d951-4eda-b17e-8032f5d7ceea",
-      "id": 107,
-      "createDate": 1701063530.67548,
-      "modifyDate": 1701063530.67548,
+      "image": "/api/3/images/fc45c451-d15e-4fe7-95ee-e06ca0e8cded",
+      "id": 99,
+      "createDate": 1702194074.344085,
+      "modifyDate": 1702194074.344085,
       "deletedAt": null,
       "importedBy": [],
       "recordTags": [
@@ -21,7 +21,7 @@
         {
           "@type": "Workflow",
           "triggerLimit": null,
-          "name": "> Majestic Million Feed > Fetch",
+          "name": "> Majestic Million Feed > Create",
           "aliasName": null,
           "tag": null,
           "description": "Fetch Indicators from Majestic Million Feed",
@@ -29,12 +29,179 @@
           "debug": false,
           "singleRecordExecution": false,
           "remoteExecutableFlag": false,
+          "parameters": [
+            "ingestedData",
+            "confidence",
+            "reputation",
+            "tlp"
+          ],
+          "synchronous": false,
+          "lastModifyDate": 1702267271,
+          "collection": "/api/3/workflow_collections/62475e71-6936-4e9e-b278-e029821c6e64",
+          "versions": [],
+          "triggerStep": "/api/3/workflow_steps/f4b5879f-aff6-4335-8a9b-194f3a57bde7",
+          "steps": [
+            {
+              "@type": "WorkflowStep",
+              "name": "Configuration",
+              "description": null,
+              "arguments": {
+                "tlp": "{{vars.input.params.tlp}}",
+                "tlp_map": "{'Red': {{'TrafficLightProtocol'| picklist('Red') }}, 'Amber': {{'TrafficLightProtocol'| picklist('Amber') }}, 'Green': {{'TrafficLightProtocol'| picklist('Green') }}, 'White': {{'TrafficLightProtocol'| picklist('White') }}}",
+                "confidence": "{{vars.input.params.confidence}}",
+                "reputation": "{{vars.input.params.reputation}}",
+                "reputation_map": "{'Good': {{'IndicatorReputation'| picklist('Good') }}, 'Malicious': {{'IndicatorReputation'| picklist('Malicious') }}, 'Suspicious': {{'IndicatorReputation'| picklist('Suspicious') }}, 'TBD': {{'IndicatorReputation'| picklist('TBD') }}, 'No Reputation Available': {{'IndicatorReputation'| picklist('No Reputation Available') }}}"
+              },
+              "status": null,
+              "top": "160",
+              "left": "300",
+              "stepType": "/api/3/workflow_step_types/04d0cf46-b6a8-42c4-8683-60a7eaa69e8f",
+              "group": null,
+              "uuid": "fd3d335d-1da7-4806-af94-d46da08f9cbb"
+            },
+            {
+              "@type": "WorkflowStep",
+              "name": "Create Record",
+              "description": null,
+              "arguments": {
+                "for_each": {
+                  "item": "{{vars.input.params.ingestedData}}",
+                  "__bulk": true,
+                  "parallel": false,
+                  "condition": "",
+                  "batch_size": 4000
+                },
+                "resource": {
+                  "tLP": "{{vars.tlp_resolved}}",
+                  "value": "{{vars.item.Domain}}",
+                  "source": "Majestic Million Feed",
+                  "__replace": "true",
+                  "confidence": "{{vars.confidence}}",
+                  "recordTags": [
+                    "/api/3/tags/majestic-million-feed"
+                  ],
+                  "reputation": "{{vars.reputation_resolved}}",
+                  "sourceData": "{{vars.item | toJSON}}",
+                  "typeOfFeed": "/api/3/picklists/18c5c903-eda5-494d-aa7e-f28b479681ac",
+                  "description": "<table style=\"letter-spacing: 0.76px; width: 100%; margin-left: auto; margin-right: auto;\" border=\"1\"><colgroup><col style=\"width: 99.7921%;\"></colgroup>\n<tbody>\n<tr>\n<td style=\"text-align: left;\"><strong>Ingested via Majestic Million Feed</strong></td>\n</tr>\n</tbody>\n</table>\n<table style=\"border-collapse: collapse; width: 100%; margin-left: 0px; margin-right: auto;\" border=\"1\"><colgroup><col style=\"width: 49.896%;\"><col style=\"width: 49.896%;\"></colgroup>\n<tbody>\n<tr>\n<td style=\"text-align: left;\"><strong>Domain</strong></td>\n<td style=\"text-align: left;\">{{vars.item.Domain}}</td>\n</tr>\n</tbody>\n</table>"
+                },
+                "operation": "Overwrite",
+                "collection": "/api/3/upsert/threat_intel_feeds",
+                "__recommend": [],
+                "fieldOperation": {
+                  "recordTags": "Overwrite",
+                  "threatTypes": "Overwrite",
+                  "killChainPhases": "Overwrite"
+                },
+                "step_variables": []
+              },
+              "status": null,
+              "top": "420",
+              "left": "660",
+              "stepType": "/api/3/workflow_step_types/2597053c-e718-44b4-8394-4d40fe26d357",
+              "group": null,
+              "uuid": "6a555137-eac4-49cc-9df9-5a3591e2f1b0"
+            },
+            {
+              "@type": "WorkflowStep",
+              "name": "Resolve Range",
+              "description": null,
+              "arguments": {
+                "tlp_resolved": "{{vars.tlp | resolveRange(vars.tlp_map)}}",
+                "reputation_resolved": "{{vars.reputation | resolveRange(vars.reputation_map)}}"
+              },
+              "status": null,
+              "top": "300",
+              "left": "480",
+              "stepType": "/api/3/workflow_step_types/04d0cf46-b6a8-42c4-8683-60a7eaa69e8f",
+              "group": null,
+              "uuid": "e9f41997-040e-4aa8-8ca9-90d9a13c9020"
+            },
+            {
+              "@type": "WorkflowStep",
+              "name": "Start",
+              "description": null,
+              "arguments": {
+                "__triggerLimit": true,
+                "step_variables": {
+                  "input": {
+                    "params": []
+                  }
+                },
+                "triggerOnSource": true,
+                "triggerOnReplicate": false
+              },
+              "status": null,
+              "top": "30",
+              "left": "125",
+              "stepType": "/api/3/workflow_step_types/b348f017-9a94-471f-87f8-ce88b6a7ad62",
+              "group": null,
+              "uuid": "f4b5879f-aff6-4335-8a9b-194f3a57bde7"
+            }
+          ],
+          "routes": [
+            {
+              "@type": "WorkflowRoute",
+              "name": "Configuration -> Resolve Range",
+              "targetStep": "/api/3/workflow_steps/e9f41997-040e-4aa8-8ca9-90d9a13c9020",
+              "sourceStep": "/api/3/workflow_steps/fd3d335d-1da7-4806-af94-d46da08f9cbb",
+              "label": null,
+              "isExecuted": false,
+              "group": null,
+              "uuid": "97240bb5-4c7f-4d99-afce-ef34d498f3c7"
+            },
+            {
+              "@type": "WorkflowRoute",
+              "name": "Resolve Range -> Create Record",
+              "targetStep": "/api/3/workflow_steps/6a555137-eac4-49cc-9df9-5a3591e2f1b0",
+              "sourceStep": "/api/3/workflow_steps/e9f41997-040e-4aa8-8ca9-90d9a13c9020",
+              "label": null,
+              "isExecuted": false,
+              "group": null,
+              "uuid": "73f28b45-0eb4-498f-ab56-409f956c4f5b"
+            },
+            {
+              "@type": "WorkflowRoute",
+              "name": "Start -> C Copy of Configuration",
+              "targetStep": "/api/3/workflow_steps/fd3d335d-1da7-4806-af94-d46da08f9cbb",
+              "sourceStep": "/api/3/workflow_steps/f4b5879f-aff6-4335-8a9b-194f3a57bde7",
+              "label": null,
+              "isExecuted": false,
+              "group": null,
+              "uuid": "e39766ec-3dd0-4a2d-8012-22c18124fcad"
+            }
+          ],
+          "groups": [],
+          "priority": "/api/3/picklists/2b563c61-ae2c-41c0-a85a-c9709585e3f2",
+          "uuid": "6e173631-7b39-4e8c-9c8c-da93ca5e157a",
+          "id": 832,
+          "owners": [],
+          "isPrivate": false,
+          "deletedAt": null,
+          "importedBy": [],
+          "recordTags": [
+            "create",
+            "dataingestion",
+            "majestic-million-feed"
+          ]
+        },
+        {
+          "@type": "Workflow",
+          "triggerLimit": null,
+          "name": "Majestic Million Feed > Ingest > Fetch",
+          "aliasName": null,
+          "tag": null,
+          "description": "Create Indicators from Majestic Million Feed",
+          "isActive": false,
+          "debug": false,
+          "singleRecordExecution": false,
+          "remoteExecutableFlag": false,
           "parameters": [],
           "synchronous": false,
-          "lastModifyDate": 1701072491,
-          "collection": "/api/3/workflow_collections/b333fe6a-c2a7-4982-8509-f3c5e7ca824d",
+          "lastModifyDate": 1702267245,
+          "collection": "/api/3/workflow_collections/62475e71-6936-4e9e-b278-e029821c6e64",
           "versions": [],
-          "triggerStep": "/api/3/workflow_steps/c4440543-2953-42c7-bbed-da393deabce1",
+          "triggerStep": "/api/3/workflow_steps/09dd46f5-20c0-4e20-b81b-a62917f0df02",
           "steps": [
             {
               "@type": "WorkflowStep",
@@ -42,130 +209,87 @@
               "description": null,
               "arguments": {
                 "tlp": "Green",
-                "limit": "50",
-                "tlp_map": "{'Red': {{'TrafficLightProtocol'| picklist('Red') }}, 'Amber': {{'TrafficLightProtocol'| picklist('Amber') }}, 'Green': {{'TrafficLightProtocol'| picklist('Green') }}, 'White': {{'TrafficLightProtocol'| picklist('White') }}}",
+                "limit": "100",
                 "confidence": "100",
-                "reputation": "Good",
-                "reputation_map": "{'Good': {{'IndicatorReputation'| picklist('Good') }}, 'Malicious': {{'IndicatorReputation'| picklist('Malicious') }}, 'Suspicious': {{'IndicatorReputation'| picklist('Suspicious') }}, 'TBD': {{'IndicatorReputation'| picklist('TBD') }}, 'No Reputation Available': {{'IndicatorReputation' | picklist('No Reputation Available') }}}",
-                "pullMajesticMillionFeedMacroName": "MajesticMillionFeedLastPullTime_{{vars['audit_info']['cyops_playbook_iri'].split('/')[-1].replace('-','_')}}"
+                "reputation": "Good"
               },
               "status": null,
-              "top": "165",
-              "left": "300",
+              "top": "110",
+              "left": "450",
               "stepType": "/api/3/workflow_step_types/04d0cf46-b6a8-42c4-8683-60a7eaa69e8f",
               "group": null,
-              "uuid": "1cabcd52-4e01-4381-bb94-1f8d5747c4a0"
+              "uuid": "d93cbe11-c353-468e-a863-c94b9e9cb28a"
             },
             {
               "@type": "WorkflowStep",
-              "name": "Get Domain Records",
+              "name": "Fetch and Create",
               "description": null,
               "arguments": {
                 "name": "Majestic Million Feed",
-                "config": "85140409-b7df-4990-b1a2-0ec1747b62eb",
+                "config": "2afe8c1d-8082-464d-960d-03fb38bce6aa",
                 "params": {
-                  "limit": "{{vars.limit}}"
+                  "tlp": "{{vars.tlp}}",
+                  "limit": "{{vars.limit}}",
+                  "confidence": "{{vars.confidence}}",
+                  "reputation": "{{vars.reputation}}",
+                  "create_pb_id": "e1e590ab-4582-4b7c-9c5c-184b8a5c6e6b",
+                  "process_response_as": "Create as Feed Records in FortiSOAR"
                 },
                 "version": "1.0.0",
                 "connector": "majestic-million-feed",
                 "operation": "get_domain_records",
                 "operationTitle": "Get Domain Records",
                 "pickFromTenant": false,
-                "step_variables": {
-                  "data_found": "{{vars.steps.Get_Domain_Records.data}}"
-                }
-              },
-              "status": null,
-              "top": "705",
-              "left": "125",
-              "stepType": "/api/3/workflow_step_types/0bfed618-0316-11e7-93ae-92361f002671",
-              "group": null,
-              "uuid": "54de118b-31b8-4bff-a033-c1e47d0176a5"
-            },
-            {
-              "@type": "WorkflowStep",
-              "name": "Get Macro Value",
-              "description": null,
-              "arguments": {
-                "params": {
-                  "iri": "/api/wf/api/dynamic-variable/?format=json&name={{vars.pullMajesticMillionFeedMacroName}}",
-                  "body": "",
-                  "method": "GET"
-                },
-                "version": "3.2.5",
-                "connector": "cyops_utilities",
-                "operation": "make_cyops_request",
-                "operationTitle": "FSR: Make FortiSOAR API Call",
                 "step_variables": []
               },
               "status": null,
-              "top": "300",
-              "left": "300",
-              "stepType": "/api/3/workflow_step_types/0109f35d-090b-4a2b-bd8a-94cbc3508562",
+              "top": "30",
+              "left": "1100",
+              "stepType": "/api/3/workflow_step_types/0bfed618-0316-11e7-93ae-92361f002671",
               "group": null,
-              "uuid": "b7b78cc0-b5e8-4a70-9746-45bc9f48819c"
+              "uuid": "82b9ffd4-06fb-4082-8336-8737a5b31c66"
             },
             {
               "@type": "WorkflowStep",
-              "name": "Is data only for mapping",
+              "name": "Is data only for Mapping",
               "description": null,
               "arguments": {
                 "conditions": [
                   {
-                    "option": "Return Sample Data",
-                    "step_iri": "/api/3/workflow_steps/3ac592ab-f79b-4790-a169-bfaa5f794a95",
+                    "option": "Yes",
+                    "step_iri": "/api/3/workflow_steps/ba45c231-473d-4a36-b0b1-169f9a371764",
                     "condition": "{{ vars.request.env_setup == true }}",
                     "step_name": "Return Sample Data"
                   },
                   {
-                    "option": "Get Records",
+                    "option": "No",
                     "default": true,
-                    "step_iri": "/api/3/workflow_steps/54de118b-31b8-4bff-a033-c1e47d0176a5",
-                    "step_name": "Get Domain Records"
+                    "step_iri": "/api/3/workflow_steps/82b9ffd4-06fb-4082-8336-8737a5b31c66",
+                    "step_name": "Fetch and Create"
                   }
                 ],
                 "step_variables": []
               },
               "status": null,
-              "top": "570",
-              "left": "300",
+              "top": "100",
+              "left": "780",
               "stepType": "/api/3/workflow_step_types/12254cf5-5db7-4b1a-8cb1-3af081924b28",
               "group": null,
-              "uuid": "55ae0fff-8def-4067-9a06-31951c4bfd7c"
+              "uuid": "8fcd3af1-873c-461c-9f8a-2dfdf9b9331c"
             },
             {
               "@type": "WorkflowStep",
               "name": "Return Sample Data",
               "description": null,
               "arguments": {
-                "data_found": "[\n   {\n      \"TLD\":\"com\",\n      \"Domain\":\"google.com\",\n      \"RefIPs\":2237739,\n      \"IDN_TLD\":\"com\",\n      \"TldRank\":1,\n      \"GlobalRank\":1,\n      \"IDN_Domain\":\"google.com\",\n      \"PrevRefIPs\":2235404,\n      \"RefSubNets\":478101,\n      \"PrevTldRank\":1,\n      \"PrevGlobalRank\":1,\n      \"PrevRefSubNets\":477743\n   },\n   {\n      \"TLD\":\"com\",\n      \"Domain\":\"facebook.com\",\n      \"RefIPs\":2329396,\n      \"IDN_TLD\":\"com\",\n      \"TldRank\":2,\n      \"GlobalRank\":2,\n      \"IDN_Domain\":\"facebook.com\",\n      \"PrevRefIPs\":2327350,\n      \"RefSubNets\":472282,\n      \"PrevTldRank\":2,\n      \"PrevGlobalRank\":2,\n      \"PrevRefSubNets\":472128\n   },\n   {\n      \"TLD\":\"com\",\n      \"Domain\":\"youtube.com\",\n      \"RefIPs\":1912932,\n      \"IDN_TLD\":\"com\",\n      \"TldRank\":3,\n      \"GlobalRank\":3,\n      \"IDN_Domain\":\"youtube.com\",\n      \"PrevRefIPs\":1911020,\n      \"RefSubNets\":426237,\n      \"PrevTldRank\":3,\n      \"PrevGlobalRank\":3,\n      \"PrevRefSubNets\":426206\n   },\n   {\n      \"TLD\":\"com\",\n      \"Domain\":\"twitter.com\",\n      \"RefIPs\":1838984,\n      \"IDN_TLD\":\"com\",\n      \"TldRank\":4,\n      \"GlobalRank\":4,\n      \"IDN_Domain\":\"twitter.com\",\n      \"PrevRefIPs\":1837522,\n      \"RefSubNets\":414452,\n      \"PrevTldRank\":4,\n      \"PrevGlobalRank\":4,\n      \"PrevRefSubNets\":414347\n   },\n   {\n      \"TLD\":\"com\",\n      \"Domain\":\"instagram.com\",\n      \"RefIPs\":1629790,\n      \"IDN_TLD\":\"com\",\n      \"TldRank\":5,\n      \"GlobalRank\":5,\n      \"IDN_Domain\":\"instagram.com\",\n      \"PrevRefIPs\":1628129,\n      \"RefSubNets\":367381,\n      \"PrevTldRank\":5,\n      \"PrevGlobalRank\":5,\n      \"PrevRefSubNets\":367275\n   },\n   {\n      \"TLD\":\"com\",\n      \"Domain\":\"linkedin.com\",\n      \"RefIPs\":1350221,\n      \"IDN_TLD\":\"com\",\n      \"TldRank\":6,\n      \"GlobalRank\":6,\n      \"IDN_Domain\":\"linkedin.com\",\n      \"PrevRefIPs\":1348500,\n      \"RefSubNets\":340533,\n      \"PrevTldRank\":6,\n      \"PrevGlobalRank\":6,\n      \"PrevRefSubNets\":340504\n   },\n   {\n      \"TLD\":\"com\",\n      \"Domain\":\"apple.com\",\n      \"RefIPs\":842925,\n      \"IDN_TLD\":\"com\",\n      \"TldRank\":7,\n      \"GlobalRank\":7,\n      \"IDN_Domain\":\"apple.com\",\n      \"PrevRefIPs\":841210,\n      \"RefSubNets\":270398,\n      \"PrevTldRank\":7,\n      \"PrevGlobalRank\":7,\n      \"PrevRefSubNets\":270105\n   },\n   {\n      \"TLD\":\"com\",\n      \"Domain\":\"microsoft.com\",\n      \"RefIPs\":750736,\n      \"IDN_TLD\":\"com\",\n      \"TldRank\":8,\n      \"GlobalRank\":8,\n      \"IDN_Domain\":\"microsoft.com\",\n      \"PrevRefIPs\":750593,\n      \"RefSubNets\":263373,\n      \"PrevTldRank\":8,\n      \"PrevGlobalRank\":8,\n      \"PrevRefSubNets\":263466\n   },\n   {\n      \"TLD\":\"com\",\n      \"Domain\":\"googletagmanager.com\",\n      \"RefIPs\":870076,\n      \"IDN_TLD\":\"com\",\n      \"TldRank\":9,\n      \"GlobalRank\":9,\n      \"IDN_Domain\":\"googletagmanager.com\",\n      \"PrevRefIPs\":868777,\n      \"RefSubNets\":255362,\n      \"PrevTldRank\":9,\n      \"PrevGlobalRank\":9,\n      \"PrevRefSubNets\":255415\n   },\n   {\n      \"TLD\":\"org\",\n      \"Domain\":\"wikipedia.org\",\n      \"RefIPs\":871519,\n      \"IDN_TLD\":\"org\",\n      \"TldRank\":1,\n      \"GlobalRank\":10,\n      \"IDN_Domain\":\"wikipedia.org\",\n      \"PrevRefIPs\":870473,\n      \"RefSubNets\":254104,\n      \"PrevTldRank\":1,\n      \"PrevGlobalRank\":10,\n      \"PrevRefSubNets\":253962\n   },\n   {\n      \"TLD\":\"org\",\n      \"Domain\":\"wordpress.org\",\n      \"RefIPs\":897691,\n      \"IDN_TLD\":\"org\",\n      \"TldRank\":2,\n      \"GlobalRank\":11,\n      \"IDN_Domain\":\"wordpress.org\",\n      \"PrevRefIPs\":897782,\n      \"RefSubNets\":237271,\n      \"PrevTldRank\":2,\n      \"PrevGlobalRank\":11,\n      \"PrevRefSubNets\":237375\n   },\n   {\n      \"TLD\":\"be\",\n      \"Domain\":\"youtu.be\",\n      \"RefIPs\":730441,\n      \"IDN_TLD\":\"be\",\n      \"TldRank\":1,\n      \"GlobalRank\":12,\n      \"IDN_Domain\":\"youtu.be\",\n      \"PrevRefIPs\":729184,\n      \"RefSubNets\":226270,\n      \"PrevTldRank\":1,\n      \"PrevGlobalRank\":12,\n      \"PrevRefSubNets\":226080\n   },\n   {\n      \"TLD\":\"com\",\n      \"Domain\":\"pinterest.com\",\n      \"RefIPs\":814245,\n      \"IDN_TLD\":\"com\",\n      \"TldRank\":10,\n      \"GlobalRank\":13,\n      \"IDN_Domain\":\"pinterest.com\",\n      \"PrevRefIPs\":754510,\n      \"RefSubNets\":217436,\n      \"PrevTldRank\":12,\n      \"PrevGlobalRank\":16,\n      \"PrevRefSubNets\":202703\n   },\n   {\n      \"TLD\":\"org\",\n      \"Domain\":\"en.wikipedia.org\",\n      \"RefIPs\":648187,\n      \"IDN_TLD\":\"org\",\n      \"TldRank\":3,\n      \"GlobalRank\":14,\n      \"IDN_Domain\":\"en.wikipedia.org\",\n      \"PrevRefIPs\":647443,\n      \"RefSubNets\":211452,\n      \"PrevTldRank\":3,\n      \"PrevGlobalRank\":13,\n      \"PrevRefSubNets\":211451\n   },\n   {\n      \"TLD\":\"com\",\n      \"Domain\":\"play.google.com\",\n      \"RefIPs\":567235,\n      \"IDN_TLD\":\"com\",\n      \"TldRank\":11,\n      \"GlobalRank\":15,\n      \"IDN_Domain\":\"play.google.com\",\n      \"PrevRefIPs\":566094,\n      \"RefSubNets\":206038,\n      \"PrevTldRank\":10,\n      \"PrevGlobalRank\":14,\n      \"PrevRefSubNets\":205678\n   },\n   {\n      \"TLD\":\"com\",\n      \"Domain\":\"github.com\",\n      \"RefIPs\":502878,\n      \"IDN_TLD\":\"com\",\n      \"TldRank\":12,\n      \"GlobalRank\":16,\n      \"IDN_Domain\":\"github.com\",\n      \"PrevRefIPs\":502656,\n      \"RefSubNets\":204755,\n      \"PrevTldRank\":11,\n      \"PrevGlobalRank\":15,\n      \"PrevRefSubNets\":204869\n   },\n   {\n      \"TLD\":\"gl\",\n      \"Domain\":\"goo.gl\",\n      \"RefIPs\":629363,\n      \"IDN_TLD\":\"gl\",\n      \"TldRank\":1,\n      \"GlobalRank\":17,\n      \"IDN_Domain\":\"goo.gl\",\n      \"PrevRefIPs\":628257,\n      \"RefSubNets\":194539,\n      \"PrevTldRank\":1,\n      \"PrevGlobalRank\":17,\n      \"PrevRefSubNets\":194384\n   },\n   {\n      \"TLD\":\"com\",\n      \"Domain\":\"vimeo.com\",\n      \"RefIPs\":641682,\n      \"IDN_TLD\":\"com\",\n      \"TldRank\":13,\n      \"GlobalRank\":18,\n      \"IDN_Domain\":\"vimeo.com\",\n      \"PrevRefIPs\":640439,\n      \"RefSubNets\":193137,\n      \"PrevTldRank\":13,\n      \"PrevGlobalRank\":18,\n      \"PrevRefSubNets\":193093\n   },\n   {\n      \"TLD\":\"com\",\n      \"Domain\":\"maps.google.com\",\n      \"RefIPs\":661533,\n      \"IDN_TLD\":\"com\",\n      \"TldRank\":14,\n      \"GlobalRank\":19,\n      \"IDN_Domain\":\"maps.google.com\",\n      \"PrevRefIPs\":660530,\n      \"RefSubNets\":192905,\n      \"PrevTldRank\":14,\n      \"PrevGlobalRank\":19,\n      \"PrevRefSubNets\":192837\n   },\n   {\n      \"TLD\":\"com\",\n      \"Domain\":\"docs.google.com\",\n      \"RefIPs\":503256,\n      \"IDN_TLD\":\"com\",\n      \"TldRank\":15,\n      \"GlobalRank\":20,\n      \"IDN_Domain\":\"docs.google.com\",\n      \"PrevRefIPs\":502389,\n      \"RefSubNets\":176156,\n      \"PrevTldRank\":15,\n      \"PrevGlobalRank\":20,\n      \"PrevRefSubNets\":176031\n   }\n]"
+                "data": "[\n   {\n      \"TLD\":\"com\",\n      \"Domain\":\"google.com\",\n      \"RefIPs\":2237739,\n      \"IDN_TLD\":\"com\",\n      \"TldRank\":1,\n      \"GlobalRank\":1,\n      \"IDN_Domain\":\"google.com\",\n      \"PrevRefIPs\":2235404,\n      \"RefSubNets\":478101,\n      \"PrevTldRank\":1,\n      \"PrevGlobalRank\":1,\n      \"PrevRefSubNets\":477743\n   },\n   {\n      \"TLD\":\"com\",\n      \"Domain\":\"facebook.com\",\n      \"RefIPs\":2329396,\n      \"IDN_TLD\":\"com\",\n      \"TldRank\":2,\n      \"GlobalRank\":2,\n      \"IDN_Domain\":\"facebook.com\",\n      \"PrevRefIPs\":2327350,\n      \"RefSubNets\":472282,\n      \"PrevTldRank\":2,\n      \"PrevGlobalRank\":2,\n      \"PrevRefSubNets\":472128\n   },\n   {\n      \"TLD\":\"com\",\n      \"Domain\":\"youtube.com\",\n      \"RefIPs\":1912932,\n      \"IDN_TLD\":\"com\",\n      \"TldRank\":3,\n      \"GlobalRank\":3,\n      \"IDN_Domain\":\"youtube.com\",\n      \"PrevRefIPs\":1911020,\n      \"RefSubNets\":426237,\n      \"PrevTldRank\":3,\n      \"PrevGlobalRank\":3,\n      \"PrevRefSubNets\":426206\n   },\n   {\n      \"TLD\":\"com\",\n      \"Domain\":\"twitter.com\",\n      \"RefIPs\":1838984,\n      \"IDN_TLD\":\"com\",\n      \"TldRank\":4,\n      \"GlobalRank\":4,\n      \"IDN_Domain\":\"twitter.com\",\n      \"PrevRefIPs\":1837522,\n      \"RefSubNets\":414452,\n      \"PrevTldRank\":4,\n      \"PrevGlobalRank\":4,\n      \"PrevRefSubNets\":414347\n   },\n   {\n      \"TLD\":\"com\",\n      \"Domain\":\"instagram.com\",\n      \"RefIPs\":1629790,\n      \"IDN_TLD\":\"com\",\n      \"TldRank\":5,\n      \"GlobalRank\":5,\n      \"IDN_Domain\":\"instagram.com\",\n      \"PrevRefIPs\":1628129,\n      \"RefSubNets\":367381,\n      \"PrevTldRank\":5,\n      \"PrevGlobalRank\":5,\n      \"PrevRefSubNets\":367275\n   },\n   {\n      \"TLD\":\"com\",\n      \"Domain\":\"linkedin.com\",\n      \"RefIPs\":1350221,\n      \"IDN_TLD\":\"com\",\n      \"TldRank\":6,\n      \"GlobalRank\":6,\n      \"IDN_Domain\":\"linkedin.com\",\n      \"PrevRefIPs\":1348500,\n      \"RefSubNets\":340533,\n      \"PrevTldRank\":6,\n      \"PrevGlobalRank\":6,\n      \"PrevRefSubNets\":340504\n   },\n   {\n      \"TLD\":\"com\",\n      \"Domain\":\"apple.com\",\n      \"RefIPs\":842925,\n      \"IDN_TLD\":\"com\",\n      \"TldRank\":7,\n      \"GlobalRank\":7,\n      \"IDN_Domain\":\"apple.com\",\n      \"PrevRefIPs\":841210,\n      \"RefSubNets\":270398,\n      \"PrevTldRank\":7,\n      \"PrevGlobalRank\":7,\n      \"PrevRefSubNets\":270105\n   },\n   {\n      \"TLD\":\"com\",\n      \"Domain\":\"microsoft.com\",\n      \"RefIPs\":750736,\n      \"IDN_TLD\":\"com\",\n      \"TldRank\":8,\n      \"GlobalRank\":8,\n      \"IDN_Domain\":\"microsoft.com\",\n      \"PrevRefIPs\":750593,\n      \"RefSubNets\":263373,\n      \"PrevTldRank\":8,\n      \"PrevGlobalRank\":8,\n      \"PrevRefSubNets\":263466\n   },\n   {\n      \"TLD\":\"com\",\n      \"Domain\":\"googletagmanager.com\",\n      \"RefIPs\":870076,\n      \"IDN_TLD\":\"com\",\n      \"TldRank\":9,\n      \"GlobalRank\":9,\n      \"IDN_Domain\":\"googletagmanager.com\",\n      \"PrevRefIPs\":868777,\n      \"RefSubNets\":255362,\n      \"PrevTldRank\":9,\n      \"PrevGlobalRank\":9,\n      \"PrevRefSubNets\":255415\n   },\n   {\n      \"TLD\":\"org\",\n      \"Domain\":\"wikipedia.org\",\n      \"RefIPs\":871519,\n      \"IDN_TLD\":\"org\",\n      \"TldRank\":1,\n      \"GlobalRank\":10,\n      \"IDN_Domain\":\"wikipedia.org\",\n      \"PrevRefIPs\":870473,\n      \"RefSubNets\":254104,\n      \"PrevTldRank\":1,\n      \"PrevGlobalRank\":10,\n      \"PrevRefSubNets\":253962\n   },\n   {\n      \"TLD\":\"org\",\n      \"Domain\":\"wordpress.org\",\n      \"RefIPs\":897691,\n      \"IDN_TLD\":\"org\",\n      \"TldRank\":2,\n      \"GlobalRank\":11,\n      \"IDN_Domain\":\"wordpress.org\",\n      \"PrevRefIPs\":897782,\n      \"RefSubNets\":237271,\n      \"PrevTldRank\":2,\n      \"PrevGlobalRank\":11,\n      \"PrevRefSubNets\":237375\n   },\n   {\n      \"TLD\":\"be\",\n      \"Domain\":\"youtu.be\",\n      \"RefIPs\":730441,\n      \"IDN_TLD\":\"be\",\n      \"TldRank\":1,\n      \"GlobalRank\":12,\n      \"IDN_Domain\":\"youtu.be\",\n      \"PrevRefIPs\":729184,\n      \"RefSubNets\":226270,\n      \"PrevTldRank\":1,\n      \"PrevGlobalRank\":12,\n      \"PrevRefSubNets\":226080\n   },\n   {\n      \"TLD\":\"com\",\n      \"Domain\":\"pinterest.com\",\n      \"RefIPs\":814245,\n      \"IDN_TLD\":\"com\",\n      \"TldRank\":10,\n      \"GlobalRank\":13,\n      \"IDN_Domain\":\"pinterest.com\",\n      \"PrevRefIPs\":754510,\n      \"RefSubNets\":217436,\n      \"PrevTldRank\":12,\n      \"PrevGlobalRank\":16,\n      \"PrevRefSubNets\":202703\n   },\n   {\n      \"TLD\":\"org\",\n      \"Domain\":\"en.wikipedia.org\",\n      \"RefIPs\":648187,\n      \"IDN_TLD\":\"org\",\n      \"TldRank\":3,\n      \"GlobalRank\":14,\n      \"IDN_Domain\":\"en.wikipedia.org\",\n      \"PrevRefIPs\":647443,\n      \"RefSubNets\":211452,\n      \"PrevTldRank\":3,\n      \"PrevGlobalRank\":13,\n      \"PrevRefSubNets\":211451\n   },\n   {\n      \"TLD\":\"com\",\n      \"Domain\":\"play.google.com\",\n      \"RefIPs\":567235,\n      \"IDN_TLD\":\"com\",\n      \"TldRank\":11,\n      \"GlobalRank\":15,\n      \"IDN_Domain\":\"play.google.com\",\n      \"PrevRefIPs\":566094,\n      \"RefSubNets\":206038,\n      \"PrevTldRank\":10,\n      \"PrevGlobalRank\":14,\n      \"PrevRefSubNets\":205678\n   },\n   {\n      \"TLD\":\"com\",\n      \"Domain\":\"github.com\",\n      \"RefIPs\":502878,\n      \"IDN_TLD\":\"com\",\n      \"TldRank\":12,\n      \"GlobalRank\":16,\n      \"IDN_Domain\":\"github.com\",\n      \"PrevRefIPs\":502656,\n      \"RefSubNets\":204755,\n      \"PrevTldRank\":11,\n      \"PrevGlobalRank\":15,\n      \"PrevRefSubNets\":204869\n   },\n   {\n      \"TLD\":\"gl\",\n      \"Domain\":\"goo.gl\",\n      \"RefIPs\":629363,\n      \"IDN_TLD\":\"gl\",\n      \"TldRank\":1,\n      \"GlobalRank\":17,\n      \"IDN_Domain\":\"goo.gl\",\n      \"PrevRefIPs\":628257,\n      \"RefSubNets\":194539,\n      \"PrevTldRank\":1,\n      \"PrevGlobalRank\":17,\n      \"PrevRefSubNets\":194384\n   },\n   {\n      \"TLD\":\"com\",\n      \"Domain\":\"vimeo.com\",\n      \"RefIPs\":641682,\n      \"IDN_TLD\":\"com\",\n      \"TldRank\":13,\n      \"GlobalRank\":18,\n      \"IDN_Domain\":\"vimeo.com\",\n      \"PrevRefIPs\":640439,\n      \"RefSubNets\":193137,\n      \"PrevTldRank\":13,\n      \"PrevGlobalRank\":18,\n      \"PrevRefSubNets\":193093\n   },\n   {\n      \"TLD\":\"com\",\n      \"Domain\":\"maps.google.com\",\n      \"RefIPs\":661533,\n      \"IDN_TLD\":\"com\",\n      \"TldRank\":14,\n      \"GlobalRank\":19,\n      \"IDN_Domain\":\"maps.google.com\",\n      \"PrevRefIPs\":660530,\n      \"RefSubNets\":192905,\n      \"PrevTldRank\":14,\n      \"PrevGlobalRank\":19,\n      \"PrevRefSubNets\":192837\n   },\n   {\n      \"TLD\":\"com\",\n      \"Domain\":\"docs.google.com\",\n      \"RefIPs\":503256,\n      \"IDN_TLD\":\"com\",\n      \"TldRank\":15,\n      \"GlobalRank\":20,\n      \"IDN_Domain\":\"docs.google.com\",\n      \"PrevRefIPs\":502389,\n      \"RefSubNets\":176156,\n      \"PrevTldRank\":15,\n      \"PrevGlobalRank\":20,\n      \"PrevRefSubNets\":176031\n   }\n]"
               },
               "status": null,
-              "top": "705",
-              "left": "475",
+              "top": "190",
+              "left": "1100",
               "stepType": "/api/3/workflow_step_types/04d0cf46-b6a8-42c4-8683-60a7eaa69e8f",
               "group": null,
-              "uuid": "3ac592ab-f79b-4790-a169-bfaa5f794a95"
-            },
-            {
-              "@type": "WorkflowStep",
-              "name": "Save Result",
-              "description": null,
-              "arguments": {
-                "data": "{{vars.data_found}}",
-                "confidence": "{{vars.confidence}}",
-                "reputation": "{{vars.reputation}}",
-                "current_time": "{{vars.curr_time}}",
-                "tlp_resolved": "{{vars.tlp | resolveRange(vars.tlp_map)}}",
-                "reputation_resolved": "{{vars.reputation | resolveRange(vars.reputation_map)}}",
-                "pullMajesticMillionFeedMacroName": "{{vars.pullMajesticMillionFeedMacroName}}"
-              },
-              "status": null,
-              "top": "840",
-              "left": "300",
-              "stepType": "/api/3/workflow_step_types/04d0cf46-b6a8-42c4-8683-60a7eaa69e8f",
-              "group": null,
-              "uuid": "ea4907d5-8134-4309-a1e7-763011f40211"
+              "uuid": "ba45c231-473d-4a36-b0b1-169f9a371764"
             },
             {
               "@type": "WorkflowStep",
@@ -177,127 +301,72 @@
                   "input": {
                     "params": []
                   },
-                  "_configuration_schema": "[\n   {\n      \"title\":\"Limit\",\n      \"name\":\"limit\",\n      \"type\":\"integer\",\n      \"tooltip\":\"Number of Indicators to Fetch\",\n      \"required\":true,\n      \"editable\":true,\n      \"visible\":true,\n      \"value\":50\n   },\n   {\n      \"title\":\"Confidence\",\n      \"name\":\"confidence\",\n      \"type\":\"integer\",\n      \"tooltip\":\"Default Confidence score to be set for the feeds\",\n      \"required\":false,\n      \"editable\":true,\n      \"visible\":true,\n      \"value\":100,\n      \"validation\":{\n         \"minlength\":0,\n         \"maxlength\":100\n      }\n   },\n   {\n      \"title\":\"Reputation\",\n      \"name\":\"reputation\",\n      \"type\":\"select\",\n      \"tooltip\":\"Default Reputation to be set for the feeds\",\n      \"required\":true,\n      \"editable\":true,\n      \"visible\":true,\n      \"options\":[\n         \"Good\",\n         \"Suspicious\",\n         \"Malicious\",\n         \"No Reputation Available\",\n         \"TBD\"\n      ],\n      \"value\":\"Good\"\n   },\n   {\n      \"title\":\"TLP\",\n      \"name\":\"tlp\",\n      \"type\":\"select\",\n      \"tooltip\":\"Default TLP to be set for the feeds\",\n      \"required\":false,\n      \"editable\":true,\n      \"visible\":true,\n      \"options\":[\n         \"Red\",\n         \"Amber\",\n         \"Green\",\n         \"White\"\n      ],\n      \"value\":\"Green\"\n   }\n]",
-                  "MajesticMillionLastAlertPullTime": "MajesticMillionLastAlertPullTime_{{vars['audit_info']['cyops_playbook_iri'].split('/')[-1].replace('-','_')}}"
+                  "_configuration_schema": "[\n{\n      \"title\":\"Limit\",\n      \"name\":\"limit\",\n      \"type\":\"integer\",\n      \"tooltip\":\"Number of Indicators to Fetch\",\n      \"required\":false,\n      \"editable\":true,\n      \"visible\":true,\n      \"value\":100\n   },\n   {\n      \"title\":\"Confidence\",\n      \"name\":\"confidence\",\n      \"type\":\"integer\",\n      \"tooltip\":\"Default Confidence score to be set for the feeds\",\n      \"required\":false,\n      \"editable\":true,\n      \"visible\":true,\n      \"value\":100,\n      \"validation\":{\n         \"minlength\":0,\n         \"maxlength\":100\n      }\n   },\n   {\n      \"title\":\"Reputation\",\n      \"name\":\"reputation\",\n      \"type\":\"select\",\n      \"tooltip\":\"Default Reputation to be set for the feeds\",\n      \"required\":false,\n      \"editable\":true,\n      \"visible\":true,\n      \"options\":[\n         \"Good\",\n         \"Suspicious\",\n         \"Malicious\",\n         \"No Reputation Available\",\n         \"TBD\"\n      ],\n      \"value\":\"Good\"\n   },\n   {\n      \"title\":\"TLP\",\n      \"name\":\"tlp\",\n      \"type\":\"select\",\n      \"tooltip\":\"Default TLP to be set for the feeds\",\n      \"required\":false,\n      \"editable\":true,\n      \"visible\":true,\n      \"options\":[\n         \"Red\",\n         \"Amber\",\n         \"Green\",\n         \"White\"\n      ],\n      \"value\":\"Green\"\n   }\n]"
                 },
                 "triggerOnSource": true,
                 "triggerOnReplicate": false
               },
               "status": null,
-              "top": "30",
-              "left": "300",
+              "top": "110",
+              "left": "125",
               "stepType": "/api/3/workflow_step_types/b348f017-9a94-471f-87f8-ce88b6a7ad62",
               "group": null,
-              "uuid": "c4440543-2953-42c7-bbed-da393deabce1"
-            },
-            {
-              "@type": "WorkflowStep",
-              "name": "Time Config",
-              "description": null,
-              "arguments": {
-                "curr_time": "{{ arrow.utcnow().format('YYYY-MM-DDTHH:mm:ss.ssss')\n}}Z",
-                "last_pull_time": "{%if vars.steps.Get_Macro_Value.data['hydra:member'] | length > 0 %}{%if vars.request.env_setup %}{%if not vars.minutes or vars.minutes == ''%}0{% else %}{{((arrow.utcnow().shift(minutes=-vars.minutes)).format('YYYY-MM-DDTHH:mm:ss.ssss'))}}Z{% endif %}{% else %}{{vars.steps.Get_Macro_Value.data['hydra:member'][0]['value']}}{% endif %}{% else %}{%if not vars.minutes or vars.minutes == ''%}0{% else %}{{((arrow.utcnow().shift(minutes=-vars.minutes)).format('YYYY-MM-DDTHH:mm:ss.ssss'))}}Z{% endif %}{% endif %}"
-              },
-              "status": null,
-              "top": "435",
-              "left": "300",
-              "stepType": "/api/3/workflow_step_types/04d0cf46-b6a8-42c4-8683-60a7eaa69e8f",
-              "group": null,
-              "uuid": "2836c2cc-c19c-424d-9460-f98b33998d5f"
+              "uuid": "09dd46f5-20c0-4e20-b81b-a62917f0df02"
             }
           ],
           "routes": [
             {
               "@type": "WorkflowRoute",
-              "name": "Configuration -> Macro Value",
-              "targetStep": "/api/3/workflow_steps/b7b78cc0-b5e8-4a70-9746-45bc9f48819c",
-              "sourceStep": "/api/3/workflow_steps/1cabcd52-4e01-4381-bb94-1f8d5747c4a0",
+              "name": "Configuration -> Is data only for Mapping",
+              "targetStep": "/api/3/workflow_steps/8fcd3af1-873c-461c-9f8a-2dfdf9b9331c",
+              "sourceStep": "/api/3/workflow_steps/d93cbe11-c353-468e-a863-c94b9e9cb28a",
               "label": null,
               "isExecuted": false,
               "group": null,
-              "uuid": "45bf714b-7866-410b-b98d-c5dda89f2702"
+              "uuid": "3825cf2d-be59-4146-b0c5-51b3a4b4a7a7"
             },
             {
               "@type": "WorkflowRoute",
-              "name": "Get Domain Records -> Save Result",
-              "targetStep": "/api/3/workflow_steps/ea4907d5-8134-4309-a1e7-763011f40211",
-              "sourceStep": "/api/3/workflow_steps/54de118b-31b8-4bff-a033-c1e47d0176a5",
-              "label": null,
+              "name": "Is data only for Mapping -> Fetch and Create",
+              "targetStep": "/api/3/workflow_steps/82b9ffd4-06fb-4082-8336-8737a5b31c66",
+              "sourceStep": "/api/3/workflow_steps/8fcd3af1-873c-461c-9f8a-2dfdf9b9331c",
+              "label": "No",
               "isExecuted": false,
               "group": null,
-              "uuid": "0de2972d-840a-4e6e-8413-4fa1d261dd26"
+              "uuid": "cb60ac15-74f1-41b1-93a0-95aed9942273"
             },
             {
               "@type": "WorkflowRoute",
-              "name": "Get Macro Value -> Time Config",
-              "targetStep": "/api/3/workflow_steps/2836c2cc-c19c-424d-9460-f98b33998d5f",
-              "sourceStep": "/api/3/workflow_steps/b7b78cc0-b5e8-4a70-9746-45bc9f48819c",
-              "label": null,
+              "name": "Is data only for Mapping -> Return Sample Data",
+              "targetStep": "/api/3/workflow_steps/ba45c231-473d-4a36-b0b1-169f9a371764",
+              "sourceStep": "/api/3/workflow_steps/8fcd3af1-873c-461c-9f8a-2dfdf9b9331c",
+              "label": "Yes",
               "isExecuted": false,
               "group": null,
-              "uuid": "05c861f2-8efe-4d93-8e06-3e06efb206ed"
-            },
-            {
-              "@type": "WorkflowRoute",
-              "name": "Return Sample Data -> Save Result",
-              "targetStep": "/api/3/workflow_steps/ea4907d5-8134-4309-a1e7-763011f40211",
-              "sourceStep": "/api/3/workflow_steps/3ac592ab-f79b-4790-a169-bfaa5f794a95",
-              "label": null,
-              "isExecuted": false,
-              "group": null,
-              "uuid": "10b7851a-1c6f-40f9-8fcd-e14b21831d22"
+              "uuid": "40ffd761-3c29-485a-9aa6-2536a882d938"
             },
             {
               "@type": "WorkflowRoute",
               "name": "Start -> Configuration",
-              "targetStep": "/api/3/workflow_steps/1cabcd52-4e01-4381-bb94-1f8d5747c4a0",
-              "sourceStep": "/api/3/workflow_steps/c4440543-2953-42c7-bbed-da393deabce1",
+              "targetStep": "/api/3/workflow_steps/d93cbe11-c353-468e-a863-c94b9e9cb28a",
+              "sourceStep": "/api/3/workflow_steps/09dd46f5-20c0-4e20-b81b-a62917f0df02",
               "label": null,
               "isExecuted": false,
               "group": null,
-              "uuid": "40315b4b-70e5-451e-b2a7-12cc644b4360"
-            },
-            {
-              "@type": "WorkflowRoute",
-              "name": "Time Config -> Which Fetch mode",
-              "targetStep": "/api/3/workflow_steps/55ae0fff-8def-4067-9a06-31951c4bfd7c",
-              "sourceStep": "/api/3/workflow_steps/2836c2cc-c19c-424d-9460-f98b33998d5f",
-              "label": null,
-              "isExecuted": false,
-              "group": null,
-              "uuid": "01b3e72c-014e-4f4c-ad2a-71768ce6ac7c"
-            },
-            {
-              "@type": "WorkflowRoute",
-              "name": "Which Fetch mode -> Get Domain Records",
-              "targetStep": "/api/3/workflow_steps/54de118b-31b8-4bff-a033-c1e47d0176a5",
-              "sourceStep": "/api/3/workflow_steps/55ae0fff-8def-4067-9a06-31951c4bfd7c",
-              "label": "Get Records",
-              "isExecuted": false,
-              "group": null,
-              "uuid": "21e0440f-b28b-44af-8f47-f00711800ea0"
-            },
-            {
-              "@type": "WorkflowRoute",
-              "name": "Which Fetch mode -> Return Sample Data",
-              "targetStep": "/api/3/workflow_steps/3ac592ab-f79b-4790-a169-bfaa5f794a95",
-              "sourceStep": "/api/3/workflow_steps/55ae0fff-8def-4067-9a06-31951c4bfd7c",
-              "label": "Return Sample Data",
-              "isExecuted": false,
-              "group": null,
-              "uuid": "7bb83062-a3d5-4a92-82da-e591db090ced"
+              "uuid": "e4cd778b-5812-4938-8379-7b1279d01816"
             }
           ],
           "groups": [],
           "priority": "/api/3/picklists/2b563c61-ae2c-41c0-a85a-c9709585e3f2",
-          "uuid": "1b3460ad-f3d8-4d36-a6b0-6ca8d4a18d74",
-          "id": 1340,
+          "uuid": "f7579116-b47a-4988-9793-395590a7c815",
+          "id": 833,
           "owners": [],
           "isPrivate": false,
           "deletedAt": null,
           "importedBy": [],
           "recordTags": [
             "dataingestion",
+            "ingest",
             "fetch",
             "majestic-million-feed"
           ]
@@ -315,10 +384,10 @@
           "remoteExecutableFlag": false,
           "parameters": [],
           "synchronous": false,
-          "lastModifyDate": 1701068302,
-          "collection": "/api/3/workflow_collections/b333fe6a-c2a7-4982-8509-f3c5e7ca824d",
+          "lastModifyDate": 1702267398,
+          "collection": "/api/3/workflow_collections/62475e71-6936-4e9e-b278-e029821c6e64",
           "versions": [],
-          "triggerStep": "/api/3/workflow_steps/529ed30e-94e7-44fa-8f46-767796ff83c0",
+          "triggerStep": "/api/3/workflow_steps/9470d52c-3e07-49bc-bba7-fd49bccf97d0",
           "steps": [
             {
               "@type": "WorkflowStep",
@@ -328,29 +397,28 @@
                 "name": "Majestic Million Feed",
                 "config": "85140409-b7df-4990-b1a2-0ec1747b62eb",
                 "params": {
-                  "limit": 20
+                  "limit": 55,
+                  "process_response_as": "Return as JSON"
                 },
                 "version": "1.0.0",
                 "connector": "majestic-million-feed",
                 "operation": "get_domain_records",
                 "operationTitle": "Get Domain Records",
-                "step_variables": {
-                  "output_data": "{{vars.result}}"
-                }
+                "step_variables": []
               },
               "status": null,
               "top": "120",
-              "left": "188",
+              "left": "180",
               "stepType": "/api/3/workflow_step_types/0bfed618-0316-11e7-93ae-92361f002671",
               "group": null,
-              "uuid": "123ee4db-cba8-4c97-848a-ececcd4dd2fb"
+              "uuid": "da894d5a-6962-4496-8a71-7169e0a1960f"
             },
             {
               "@type": "WorkflowStep",
               "name": "Start",
               "description": null,
               "arguments": {
-                "route": "27326453-7725-4728-8164-ad1aa8803177",
+                "route": "9ac11154-c149-4864-97ac-9f3bbd442401",
                 "title": "Majestic Million Feed: Get Domain Records",
                 "resources": [
                   "alerts"
@@ -370,331 +438,31 @@
               "left": "20",
               "stepType": "/api/3/workflow_step_types/f414d039-bb0d-4e59-9c39-a8f1e880b18a",
               "group": null,
-              "uuid": "529ed30e-94e7-44fa-8f46-767796ff83c0"
+              "uuid": "9470d52c-3e07-49bc-bba7-fd49bccf97d0"
             }
           ],
           "routes": [
             {
               "@type": "WorkflowRoute",
               "name": "Start-> Get Domain Records",
-              "targetStep": "/api/3/workflow_steps/123ee4db-cba8-4c97-848a-ececcd4dd2fb",
-              "sourceStep": "/api/3/workflow_steps/529ed30e-94e7-44fa-8f46-767796ff83c0",
+              "targetStep": "/api/3/workflow_steps/da894d5a-6962-4496-8a71-7169e0a1960f",
+              "sourceStep": "/api/3/workflow_steps/9470d52c-3e07-49bc-bba7-fd49bccf97d0",
               "label": null,
               "isExecuted": false,
               "group": null,
-              "uuid": "ba2ef787-3977-4607-b0f4-e4a52ba90744"
+              "uuid": "61320c0a-92ae-4142-a466-c45afab301e5"
             }
           ],
           "groups": [],
           "priority": null,
-          "uuid": "639d7fa8-7215-49a8-8f01-6738701e39b1",
-          "id": 1332,
+          "uuid": "f9582164-97f6-426f-8b62-a14eaf93d2f9",
+          "id": 834,
           "owners": [],
           "isPrivate": false,
           "deletedAt": null,
           "importedBy": [],
           "recordTags": [
             "Majestic",
-            "majestic-million-feed"
-          ]
-        },
-        {
-          "@type": "Workflow",
-          "triggerLimit": null,
-          "name": "Download Domains CSV",
-          "aliasName": null,
-          "tag": "#Majestic Million Feed",
-          "description": "Downloads Top 100k good domains and their ratings in a CSV format.",
-          "isActive": false,
-          "debug": false,
-          "singleRecordExecution": false,
-          "remoteExecutableFlag": false,
-          "parameters": [],
-          "synchronous": false,
-          "lastModifyDate": null,
-          "collection": "/api/3/workflow_collections/b333fe6a-c2a7-4982-8509-f3c5e7ca824d",
-          "versions": [],
-          "triggerStep": "/api/3/workflow_steps/3018ff4a-3a68-4483-a619-fcd87d688dd5",
-          "steps": [
-            {
-              "@type": "WorkflowStep",
-              "name": "Download Domains CSV",
-              "description": null,
-              "arguments": {
-                "name": "Majestic Million Feed",
-                "config": "",
-                "params": [],
-                "version": "1.0.0",
-                "connector": "majestic-million-feed",
-                "operation": "download_domains_csv",
-                "operationTitle": "Download Domains CSV",
-                "step_variables": {
-                  "output_data": "{{vars.result}}"
-                }
-              },
-              "status": null,
-              "top": "120",
-              "left": "188",
-              "stepType": "/api/3/workflow_step_types/0bfed618-0316-11e7-93ae-92361f002671",
-              "group": null,
-              "uuid": "bebc69d8-421b-43b8-98c9-afb8161f1426"
-            },
-            {
-              "@type": "WorkflowStep",
-              "name": "Start",
-              "description": null,
-              "arguments": {
-                "route": "305227bb-bb44-40e4-ad1d-78bcc19c4c64",
-                "title": "Majestic Million Feed: Download Domains CSV",
-                "resources": [
-                  "alerts"
-                ],
-                "inputVariables": [],
-                "step_variables": {
-                  "input": {
-                    "records": "{{vars.input.records[0]}}"
-                  }
-                },
-                "executeButtonText": "Execute",
-                "noRecordExecution": true,
-                "singleRecordExecution": false
-              },
-              "status": null,
-              "top": "20",
-              "left": "20",
-              "stepType": "/api/3/workflow_step_types/f414d039-bb0d-4e59-9c39-a8f1e880b18a",
-              "group": null,
-              "uuid": "3018ff4a-3a68-4483-a619-fcd87d688dd5"
-            }
-          ],
-          "routes": [
-            {
-              "@type": "WorkflowRoute",
-              "name": "Start-> Download Domains CSV",
-              "targetStep": "/api/3/workflow_steps/bebc69d8-421b-43b8-98c9-afb8161f1426",
-              "sourceStep": "/api/3/workflow_steps/3018ff4a-3a68-4483-a619-fcd87d688dd5",
-              "label": null,
-              "isExecuted": false,
-              "group": null,
-              "uuid": "c4d70558-3825-45bb-a07d-c90ba35f5c3e"
-            }
-          ],
-          "groups": [],
-          "priority": null,
-          "uuid": "8048a671-2982-428d-9785-bbfe522606bb",
-          "id": 1333,
-          "owners": [],
-          "isPrivate": false,
-          "deletedAt": null,
-          "importedBy": [],
-          "recordTags": [
-            "Majestic",
-            "majestic-million-feed"
-          ]
-        },
-        {
-          "@type": "Workflow",
-          "triggerLimit": null,
-          "name": "> Majestic Million Feed > Ingest",
-          "aliasName": null,
-          "tag": null,
-          "description": "Create Indicators from Majestic Million Feed",
-          "isActive": false,
-          "debug": false,
-          "singleRecordExecution": false,
-          "remoteExecutableFlag": false,
-          "parameters": [
-            "ri"
-          ],
-          "synchronous": false,
-          "lastModifyDate": 1701072829,
-          "collection": "/api/3/workflow_collections/b333fe6a-c2a7-4982-8509-f3c5e7ca824d",
-          "versions": [],
-          "triggerStep": "/api/3/workflow_steps/5de6f6e5-6efe-4c86-a9c6-c8e0ed209d32",
-          "steps": [
-            {
-              "@type": "WorkflowStep",
-              "name": "Configuration",
-              "description": null,
-              "arguments": {
-                "confidence": "{{ vars.result.confidence }}",
-                "reputation": "{{ vars.result.reputation }}",
-                "source_data": "{{ vars.result.data }}",
-                "current_time": "{{ vars.result.current_time }}",
-                "tlp_resolved": "{{ vars.result.tlp_resolved }}",
-                "reputation_resolved": "{{ vars.result.reputation_resolved }}",
-                "pullMajesticMillionFeedMacroName": "{{ vars.result.pullMajesticMillionFeedMacroName }}"
-              },
-              "status": null,
-              "top": "300",
-              "left": "125",
-              "stepType": "/api/3/workflow_step_types/04d0cf46-b6a8-42c4-8683-60a7eaa69e8f",
-              "group": null,
-              "uuid": "4388f62d-b073-4cf1-bded-8142891dc177"
-            },
-            {
-              "@type": "WorkflowStep",
-              "name": "Create Record",
-              "description": null,
-              "arguments": {
-                "for_each": {
-                  "item": "{{vars.source_data}}",
-                  "__bulk": true,
-                  "parallel": false,
-                  "condition": "",
-                  "batch_size": 100
-                },
-                "resource": {
-                  "tLP": "{{vars.tlp_resolved}}",
-                  "value": "{{vars.item.Domain}}",
-                  "source": "Majestic Million Feed",
-                  "__replace": "true",
-                  "confidence": "{{vars.confidence}}",
-                  "reputation": "{{vars.reputation_resolved}}",
-                  "sourceData": "{{vars.item | toJSON}}",
-                  "typeOfFeed": "/api/3/picklists/18c5c903-eda5-494d-aa7e-f28b479681ac",
-                  "description": "<p>Ingested Via Majestic Million Feed</p>"
-                },
-                "operation": "Overwrite",
-                "collection": "/api/3/upsert/threat_intel_feeds",
-                "__recommend": [],
-                "fieldOperation": {
-                  "recordTags": "Overwrite",
-                  "threatTypes": "Overwrite",
-                  "killChainPhases": "Overwrite"
-                },
-                "step_variables": []
-              },
-              "status": null,
-              "top": "435",
-              "left": "125",
-              "stepType": "/api/3/workflow_step_types/2597053c-e718-44b4-8394-4d40fe26d357",
-              "group": null,
-              "uuid": "9ea9b9fa-8cbb-464b-b3fe-44eb32e19639"
-            },
-            {
-              "@type": "WorkflowStep",
-              "name": "Get Domains",
-              "description": null,
-              "arguments": {
-                "arguments": [],
-                "apply_async": false,
-                "step_variables": [],
-                "pass_parent_env": false,
-                "pass_input_record": false,
-                "workflowReference": "/api/3/workflows/1b3460ad-f3d8-4d36-a6b0-6ca8d4a18d74"
-              },
-              "status": null,
-              "top": "165",
-              "left": "125",
-              "stepType": "/api/3/workflow_step_types/74932bdc-b8b6-4d24-88c4-1a4dfbc524f3",
-              "group": null,
-              "uuid": "fbd2e3ac-9d04-46da-9175-719e20c49454"
-            },
-            {
-              "@type": "WorkflowStep",
-              "name": "Start",
-              "description": null,
-              "arguments": {
-                "route": "ec18cca4-62f4-47a7-bfc1-50a35dde0e2a",
-                "resources": [
-                  "alerts"
-                ],
-                "inputVariables": [],
-                "step_variables": {
-                  "input": {
-                    "params": [],
-                    "records": "{{vars.input.records}}"
-                  }
-                },
-                "executeButtonText": "Execute",
-                "noRecordExecution": true,
-                "singleRecordExecution": false
-              },
-              "status": null,
-              "top": "30",
-              "left": "125",
-              "stepType": "/api/3/workflow_step_types/f414d039-bb0d-4e59-9c39-a8f1e880b18a",
-              "group": null,
-              "uuid": "5de6f6e5-6efe-4c86-a9c6-c8e0ed209d32"
-            },
-            {
-              "@type": "WorkflowStep",
-              "name": "Update Last Alert Pull Time",
-              "description": null,
-              "arguments": {
-                "params": {
-                  "macro": "{{vars.pullMajesticMillionFeedMacroName}}",
-                  "value": "{{vars.current_time}}"
-                },
-                "version": "3.2.5",
-                "connector": "cyops_utilities",
-                "operation": "updatemacro",
-                "operationTitle": "FSR: Create/Update Global Variables",
-                "step_variables": []
-              },
-              "status": null,
-              "top": "570",
-              "left": "125",
-              "stepType": "/api/3/workflow_step_types/0109f35d-090b-4a2b-bd8a-94cbc3508562",
-              "group": null,
-              "uuid": "06ab100a-133c-4529-a9b5-d2d65d5beb51"
-            }
-          ],
-          "routes": [
-            {
-              "@type": "WorkflowRoute",
-              "name": "Configuration -> Create Record",
-              "targetStep": "/api/3/workflow_steps/9ea9b9fa-8cbb-464b-b3fe-44eb32e19639",
-              "sourceStep": "/api/3/workflow_steps/4388f62d-b073-4cf1-bded-8142891dc177",
-              "label": null,
-              "isExecuted": false,
-              "group": null,
-              "uuid": "8797e944-97b1-4fd9-b0e5-d205bf2d0c03"
-            },
-            {
-              "@type": "WorkflowRoute",
-              "name": "Create Record -> Update Last Alert Pull Time",
-              "targetStep": "/api/3/workflow_steps/06ab100a-133c-4529-a9b5-d2d65d5beb51",
-              "sourceStep": "/api/3/workflow_steps/9ea9b9fa-8cbb-464b-b3fe-44eb32e19639",
-              "label": null,
-              "isExecuted": false,
-              "group": null,
-              "uuid": "deece569-077a-4769-a976-6f34395d08c0"
-            },
-            {
-              "@type": "WorkflowRoute",
-              "name": "Get Incident Details -> Configuration",
-              "targetStep": "/api/3/workflow_steps/4388f62d-b073-4cf1-bded-8142891dc177",
-              "sourceStep": "/api/3/workflow_steps/fbd2e3ac-9d04-46da-9175-719e20c49454",
-              "label": null,
-              "isExecuted": false,
-              "group": null,
-              "uuid": "ddd1c81a-8ce4-4b9c-998a-9fcbc676c734"
-            },
-            {
-              "@type": "WorkflowRoute",
-              "name": "Start -> Get Incident Details",
-              "targetStep": "/api/3/workflow_steps/fbd2e3ac-9d04-46da-9175-719e20c49454",
-              "sourceStep": "/api/3/workflow_steps/5de6f6e5-6efe-4c86-a9c6-c8e0ed209d32",
-              "label": null,
-              "isExecuted": false,
-              "group": null,
-              "uuid": "db5db012-0716-4b25-b59c-b66d2e3ec75f"
-            }
-          ],
-          "groups": [],
-          "priority": "/api/3/picklists/2b563c61-ae2c-41c0-a85a-c9709585e3f2",
-          "uuid": "ef56aeaa-2b31-4918-b4ab-970828f6cd04",
-          "id": 1341,
-          "owners": [],
-          "isPrivate": false,
-          "deletedAt": null,
-          "importedBy": [],
-          "recordTags": [
-            "dataingestion",
-            "create",
-            "ingest",
             "majestic-million-feed"
           ]
         }
@@ -704,9 +472,9 @@
   "exported_tags": [
     "Majestic",
     "majestic-million-feed",
-    "dataingestion",
-    "fetch",
     "create",
-    "ingest"
+    "dataingestion",
+    "ingest",
+    "fetch"
   ]
 }
