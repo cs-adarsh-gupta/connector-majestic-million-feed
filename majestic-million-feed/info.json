@@ -9,7 +9,7 @@
   "category": "Threat Intelligence",
   "icon_small_name": "small.png",
   "icon_large_name": "large.png",
-  "help_online": "",
+  "help_online": "https://docs.fortinet.com/document/fortisoar/1.0.0/majestic-million-feed/748/majestic-million-feed-v1-0-0",
   "configuration": {
     "fields": [
       {
@@ -136,13 +136,13 @@
             "Create as Feed Records in FortiSOAR"
           ],
           "value": "Return as JSON",
-          "tooltip": "Select the method of returning the Feed Data information. You can choose between the data being created as \"Feed records\" in FortiSOAR (the Create as Feed Records in FortiSOAR option) or data being returned in the JSON format (the Return as a JSON option).",
-          "description": "Select the method of returning the Feed Data information. You can choose from the following options:  \nCreate as Feed Records in FortiSOAR: Specify data in following fields:  \nRecord Creation Playbook IRI: Specify the IRI of the playbook that creates feed records in FortiSOAR. \nConfidence: Specify the confidence score to be set for the feeds. The default value is 90. \nReputation: Select the reputation to be set for the feeds. You can choose from the following options:  Good, Suspicious, Malicious, No Reputation Available, TBD.  \nTLP: Select the TLP to be set for the feeds. You can choose from the following options: Red, Amber, Green, White. \nMaximum Age (in days): Specify the age for the feeds. The indicator expires on valid_until date unless a different expiry is specified here. When specified, the indicator is marked expired on valid_from + expiry. Return as a JSON.",
+          "tooltip": "Select the method of returning the Feed Data information.",
+          "description": "Select the method of returning the Feed Data information.",
           "onchange": {
             "Create as Feed Records in FortiSOAR": [
               {
                 "title": "Record Creation Playbook IRI",
-                "description": "Specify the IRI of the playbook that creates feed records in FortiSOAR.",
+                "description": "Specify the IRI of the playbook that creates feed records in FortiSOAR™.",
                 "tooltip": "e.g. e2de6ed7-b24a-4ab3-bec1-3c9bc19de7c8",
                 "placeholder": "38b90490-e331-41c5-b875-4e5eb2e1d0a2",
                 "type": "text",
@@ -158,14 +158,14 @@
                 "visible": true,
                 "type": "integer",
                 "name": "limit",
-                "description": "Specify the maximum number of good indicators domain to retrieve. Max limit is 1000000.",
-                "tooltip": "Specify the maximum number of good indicators domain to retrieve. Max limit is 1000000."
+                "description": "Specify the count of good indicators domain to retrieve. You can specify a maximum of 1000000.",
+                "tooltip": "Specify the count of good indicators domain to retrieve. You can specify a maximum of 1000000."
               },
               {
                 "title": "Confidence",
                 "name": "confidence",
                 "type": "integer",
-                "tooltip": "Default Confidence score to be set for the feeds.",
+                "tooltip": "Specify the confidence score to be set for the feeds",
                 "description": "Specify the confidence score to be set for the feeds.",
                 "required": false,
                 "editable": true,
@@ -180,7 +180,7 @@
                 "title": "Reputation",
                 "name": "reputation",
                 "type": "select",
-                "tooltip": "Default Reputation to be set for the feeds.",
+                "tooltip": "Select the reputation to be set for the feeds.",
                 "description": "Select the reputation to be set for the feeds. You can choose from the following options:  \nGood, Suspicious, Malicious, No Reputation Available, TBD.",
                 "required": false,
                 "editable": true,
@@ -198,8 +198,8 @@
                 "title": "TLP",
                 "name": "tlp",
                 "type": "select",
-                "tooltip": "Default TLP to be set for the feeds.",
-                "description": "Select the TLP to be set for the feeds. You can choose from the following options:  \nRed , Amber , Green , White .",
+                "tooltip": "Select the TLP to be set for the feeds.",
+                "description": "Select the TLP to be set for the feeds. You can choose from the following options:  \nRed, Amber, Green, White.",
                 "required": false,
                 "editable": true,
                 "visible": true,
@@ -220,7 +220,7 @@
                 "visible": true,
                 "type": "integer",
                 "name": "limit",
-                "description": "Specify the maximum number of good indicators domain to retrieve.",
+                "description": "Specify the count of good domains, to retrieve from Majestic Million servers.",
                 "tooltip": "Specify the maximum number of good indicators domain to retrieve."
               }
             ]
